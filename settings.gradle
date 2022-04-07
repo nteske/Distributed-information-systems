@@ -1,0 +1,5 @@
+include ':microservices:hotel-service'
+include ':microservices:location-service'
+include ':microservices:room-service'
+include ':microservices:review-credit-service'
+include ':microservices:hotel-composite-service'
