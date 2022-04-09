@@ -1,3 +1,5 @@
+include ':api'
+include ':util'
 include ':microservices:hotel-service'
 include ':microservices:location-service'
 include ':microservices:room-service'
