@@ -21,9 +21,9 @@ import api.core.location.Location;
 import api.core.room.Room;
 import api.core.review.Review;
 import api.core.hotel.Hotel;
-import microservices.composite.hotel.services.HotelCompositeIntegration;
-import util.exceptions.InvalidInputException;
-import util.exceptions.NotFoundException;
+import com.example.microservices.composite.hotel.services.HotelCompositeIntegration;
+import com.example.util.exceptions.InvalidInputException;
+import com.example.util.exceptions.NotFoundException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=RANDOM_PORT)
