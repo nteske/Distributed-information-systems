@@ -26,10 +26,10 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public List<Location> getLocation(int hotelId) {
 
-        if (hotelId < 1) throw new InvalidInputException("Invalid movieId: " + hotelId);
+        if (hotelId < 1) throw new InvalidInputException("Invalid hitelId: " + hotelId);
 
         if (hotelId == 113) {
-            LOG.debug("No location found for movieId: {}", hotelId);
+            LOG.debug("No location found for hitelId: {}", hotelId);
             return  new ArrayList<>();
         }
 
