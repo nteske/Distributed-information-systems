@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-import api.core.hotel.*;
+import com.example.api.core.hotel.*;
 import com.example.util.exceptions.InvalidInputException;
 import com.example.util.exceptions.NotFoundException;
 import com.example.util.http.ServiceUtil;

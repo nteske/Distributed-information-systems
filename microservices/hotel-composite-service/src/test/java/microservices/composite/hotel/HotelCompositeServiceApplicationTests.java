@@ -17,10 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import api.core.location.Location;
-import api.core.room.Room;
-import api.core.review.Review;
-import api.core.hotel.Hotel;
+import com.example.api.core.location.Location;
+import com.example.api.core.room.Room;
+import com.example.api.core.review.Review;
+import com.example.api.core.hotel.Hotel;
 import com.example.microservices.composite.hotel.services.HotelCompositeIntegration;
 import com.example.util.exceptions.InvalidInputException;
 import com.example.util.exceptions.NotFoundException;

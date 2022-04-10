@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import api.core.location.*;
-import api.core.hotel.*;
-import api.core.review.*;
-import api.core.room.*;
+import com.example.api.core.location.*;
+import com.example.api.core.hotel.*;
+import com.example.api.core.review.*;
+import com.example.api.core.room.*;
 import com.example.util.exceptions.InvalidInputException;
 import com.example.util.exceptions.NotFoundException;
 import com.example.util.http.HttpErrorInfo;

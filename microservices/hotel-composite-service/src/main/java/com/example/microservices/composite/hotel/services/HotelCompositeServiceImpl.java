@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import api.composite.hotel.*;
-import api.core.hotel.Hotel;
-import api.core.review.Review;
-import api.core.room.Room;
-import api.core.location.Location;
+import com.example.api.composite.hotel.*;
+import com.example.api.core.hotel.Hotel;
+import com.example.api.core.review.Review;
+import com.example.api.core.room.Room;
+import com.example.api.core.location.Location;
 import com.example.util.exceptions.NotFoundException;
 import com.example.util.http.ServiceUtil;
 
