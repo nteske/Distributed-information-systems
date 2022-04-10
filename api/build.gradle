@@ -18,7 +18,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-group = 'microservices.api'
+group = 'com.example.microservices.api'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = 1.8
 

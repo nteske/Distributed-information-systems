@@ -4,7 +4,7 @@ plugins {
 	id 'java'
 }
 
-group = 'microservices.composite.hotel'
+group = 'com.example.microservices.composite.hotel'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
@@ -21,6 +21,8 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'junit:junit:4.12'
+    implementation 'junit:junit:4.12'
 }
 
 tasks.named('test') {
