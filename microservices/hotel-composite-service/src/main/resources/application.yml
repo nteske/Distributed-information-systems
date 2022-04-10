@@ -1,3 +1,49 @@
+api:
+
+  common:
+    version: 1.0.0
+    title: Sample API
+    description: Description of the API...
+    termsOfServiceUrl: MINE TERMS OF SERVICE URL
+    license: License
+    licenseUrl: MY LICENSE URL
+
+    contact:
+      name: Contact
+      url: My
+      email: me@mail.com
+
+  hotel-composite:
+
+    get-composite-hotel:
+      description: Returns a composite view of the specified hotel id
+      notes: |
+        # Normal response
+        If the requested hotel id is found the method will return information regarding:
+        1. Hotel information
+        1. Location
+        1. Reviews
+        1. Rooms
+        1. Service Addresses
+        (technical information regarding the addresses of the microservices that created the response)
+        # Expected partial and error responses
+        1. If no hotel information is found, a <b>404 - Not Found</b> error will be returned
+        1. If no location, rooms or reviews are found for a hotel, a partial response will be returned
+    create-composite-hotel:
+      description: Creates a composite hotel
+      notes: |
+        # Normal response
+        The composite hotel information posted to the API will be split up and stored as separate hotel-info, location, crazy credit and review entities.
+        # Expected error responses
+        1. If a hotel with the same hotelId as specified in the posted information already exists,
+           an <b>422 - Unprocessable Entity</b> error with a "duplicate key" error message will be returned
+    delete-composite-hotel:
+      description: Deletes a hotel composite
+      notes: |
+        # Normal response
+        Entities for hotel information, location, rooms and reviews related to the specificed hotelId will be deleted.
+        The implementation of the delete method is idempotent, i.e. it can be called several times with the same response.
+        This means that a delete request of a non existing hotel will return <b>200 Ok</b>.
 server.port: 7000
 server.error.include-message: always
 
@@ -18,4 +64,23 @@ app:
 logging:
   level:
     root: INFO
-    microservices: DEBUG
+    com.example: DEBUG
+
+---
+spring.profiles: docker
+
+server.port: 8080
+
+app:
+  hotel-service:
+    host: hotel
+    port: 8080
+  location-service:
+    host: location
+    port: 8080
+  review-service:
+    host: review
+    port: 8080
+  room-service:
+    host: room
+    port: 8080

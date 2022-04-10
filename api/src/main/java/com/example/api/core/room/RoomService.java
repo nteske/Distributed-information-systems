@@ -1,4 +1,4 @@
-package api.core.room;
+package com.example.api.core.room;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

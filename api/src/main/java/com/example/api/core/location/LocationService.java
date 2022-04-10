@@ -1,4 +1,4 @@
-package api.core.location;
+package com.example.api.core.location;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

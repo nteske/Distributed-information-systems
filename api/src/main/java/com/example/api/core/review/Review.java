@@ -1,4 +1,4 @@
-package api.core.review;
+package com.example.api.core.review;
 
 import java.sql.Date;
 

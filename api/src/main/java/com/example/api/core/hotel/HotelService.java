@@ -1,4 +1,4 @@
-package api.core.hotel;
+package com.example.api.core.hotel;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

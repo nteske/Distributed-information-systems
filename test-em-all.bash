@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 #
+# ./gradlew clean build
+# docker-compose build
+# docker-compose up -d
+#
 # Sample usage:
 #
-#   HOST=localhost PORT=7000 ./test-em-all.bash
+#   HOST=localhost PORT=8080 ./test-em-all.bash
 #
 : ${HOST=localhost}
-: ${PORT=7000}
+: ${PORT=8080}
 
 function assertCurl() {
 
@@ -44,11 +48,57 @@ function assertEqual() {
     exit 1
   fi
 }
+
+
+function testUrl() {
+    url=$@
+    if curl $url -ks -f
+    then
+          echo "Ok"
+          return 0
+    else
+          echo -n "not yet"
+          return 1
+    fi;
+}
+
+function waitForService() {
+    url=$@
+    echo -n "Wait for: $url... "
+    n=0
+    until testUrl $url
+    do
+        n=$((n + 1))
+        if [[ $n == 100 ]]
+        then
+            echo " Give up"
+            exit 1
+        else
+            sleep 6
+            echo -n ", retry #$n "
+        fi
+    done
+}
+
+
 set -e
+
+echo "Start:" `date`
 
 echo "HOST=${HOST}"
 echo "PORT=${PORT}"
 
+
+if [[ $@ == *"start"* ]]
+then
+    echo "Restarting the test environment..."
+    echo "$ docker-compose down"
+    docker-compose down
+    echo "$ docker-compose up -d"
+    docker-compose up -d
+fi
+
+waitForService http://$HOST:$PORT/hotel-composite/1
 
 # Verify that a normal request works, expect three trivia, three reviews and three rooms
 assertCurl 200 "curl http://$HOST:$PORT/hotel-composite/1 -s"
@@ -81,3 +131,13 @@ assertEqual "\"Invalid hotelId: -1\"" "$(echo $RESPONSE | jq .message)"
 # Verify that a 400 (Bad Request) error error is returned for a hotelId that is not a number, i.e. invalid format
 assertCurl 400 "curl http://$HOST:$PORT/hotel-composite/invalidHotelId -s"
 assertEqual "\"Type mismatch.\"" "$(echo $RESPONSE | jq .message)"
+
+
+if [[ $@ == *"stop"* ]]
+then
+    echo "We are done, stopping the test environment..."
+    echo "$ docker-compose down"
+    docker-compose down
+fi
+
+echo "End:" `date`

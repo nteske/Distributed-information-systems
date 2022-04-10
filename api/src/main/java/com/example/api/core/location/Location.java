@@ -1,4 +1,4 @@
-package api.core.location;
+package com.example.api.core.location;
 
 public class Location {
     private final int hotelId;

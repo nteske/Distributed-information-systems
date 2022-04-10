@@ -1,4 +1,4 @@
-package api.composite.hotel;
+package com.example.api.composite.hotel;
 
 import java.sql.Date;
 

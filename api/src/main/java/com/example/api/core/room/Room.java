@@ -1,4 +1,4 @@
-package api.core.room;
+package com.example.api.core.room;
 
 public class Room {
     private final int hotelId;
