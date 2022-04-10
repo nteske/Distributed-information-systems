@@ -104,8 +104,8 @@ waitForService http://$HOST:$PORT/hotel-composite/1
 assertCurl 200 "curl http://$HOST:$PORT/hotel-composite/1 -s"
 assertEqual 1 $(echo $RESPONSE | jq .hotelId)
 assertEqual 3 $(echo $RESPONSE | jq ".location | length")
-assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
-assertEqual 3 $(echo $RESPONSE | jq ".room | length")
+assertEqual 2 $(echo $RESPONSE | jq ".reviews | length")
+assertEqual 0 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that a 404 (Not Found) error is returned for a non existing hotelId (13)
 assertCurl 404 "curl http://$HOST:$PORT/hotel-composite/13 -s"
@@ -114,14 +114,14 @@ assertCurl 404 "curl http://$HOST:$PORT/hotel-composite/13 -s"
 assertCurl 200 "curl http://$HOST:$PORT/hotel-composite/113 -s"
 assertEqual 113 $(echo $RESPONSE | jq .hotelId)
 assertEqual 0 $(echo $RESPONSE | jq ".location | length")
-assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
-assertEqual 3 $(echo $RESPONSE | jq ".room | length")
+assertEqual 0 $(echo $RESPONSE | jq ".reviews | length")
+assertEqual 0 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that no reviews and no rooms are returned for hotelId 213
 assertCurl 200 "curl http://$HOST:$PORT/hotel-composite/213 -s"
 assertEqual 213 $(echo $RESPONSE | jq .hotelId)
 assertEqual 3 $(echo $RESPONSE | jq ".location | length")
-assertEqual 0 $(echo $RESPONSE | jq ".reviews | length")
+assertEqual 2 $(echo $RESPONSE | jq ".reviews | length")
 assertEqual 0 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that a 422 (Unprocessable Entity) error is returned for a hotelId that is out of range (-1)
