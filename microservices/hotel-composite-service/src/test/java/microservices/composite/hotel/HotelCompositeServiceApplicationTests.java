@@ -5,11 +5,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
+import org.springframework.http.HttpStatus;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.sql.Date;
+
+import com.example.api.composite.hotel.HotelAggregate;
+import com.example.api.composite.hotel.LocationSummary;
+import com.example.api.composite.hotel.ReviewSummary;
+import com.example.api.composite.hotel.RoomSummary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +30,7 @@ import com.example.api.core.hotel.Hotel;
 import com.example.microservices.composite.hotel.services.HotelCompositeIntegration;
 import com.example.util.exceptions.InvalidInputException;
 import com.example.util.exceptions.NotFoundException;
+import static reactor.core.publisher.Mono.just;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=RANDOM_PORT)
@@ -61,46 +68,84 @@ class HotelCompositeServiceApplicationTests {
 	}
 
 	@Test
-	public void getHotelById() {
+	public void createCompositeHotel1() {
 
-        client.get()
-            .uri("/hotel-composite/" + HOTEL_ID_OK)
-            .accept(APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk()
-            .expectHeader().contentType(APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.hotelId").isEqualTo(HOTEL_ID_OK)
-            .jsonPath("$.trivia.length()").isEqualTo(1)
-            .jsonPath("$.reviews.length()").isEqualTo(1)
-        	.jsonPath("$.crazyCredits.length()").isEqualTo(1);
+		HotelAggregate compositeHotel = new HotelAggregate(1, "Some title", "Some Description","Some image",Date.valueOf("2021-08-13"),null,null,null, null);
+
+		postAndVerifyHotel(compositeHotel, OK);
+	}
+
+	@Test
+	public void createCompositeHotel2() {
+		HotelAggregate compositeHotel = new HotelAggregate(1, "Some title", "Some Description","Some image",Date.valueOf("2021-08-13"),
+				singletonList(new LocationSummary(1, "Serbia", "Belgrade", "Internacionalnih Brigada 9")),
+				singletonList(new ReviewSummary(1, 5 , "Great!", Date.valueOf("2021-10-13"))), 
+				singletonList(new RoomSummary(1, 26, 3, 220)), 
+						null);
+
+		postAndVerifyHotel(compositeHotel, OK);
+	}
+
+	@Test
+	public void deleteCompositeHotel() {
+		HotelAggregate compositeHotel = new HotelAggregate(1, "Some title", "Some Description","Some image",Date.valueOf("2021-08-13"),
+				singletonList(new LocationSummary(1, "Serbia", "Belgrade", "Internacionalnih Brigada 9")),
+				singletonList(new ReviewSummary(1,5 , "Great!", Date.valueOf("2021-10-13"))), 
+				singletonList(new RoomSummary(1, 26, 3, 220)), 
+						null);
+
+		postAndVerifyHotel(compositeHotel, OK);
+
+		deleteAndVerifyHotel(compositeHotel.getHotelId(), OK);
+		deleteAndVerifyHotel(compositeHotel.getHotelId(), OK);
+	}
+
+	@Test
+	public void getHotelById() {
+		getAndVerifyHotel(HOTEL_ID_OK, OK)
+        .jsonPath("$.hotelId").isEqualTo(HOTEL_ID_OK)
+        .jsonPath("$.location.length()").isEqualTo(1)
+        .jsonPath("$.reviews.length()").isEqualTo(1)
+    	.jsonPath("$.room.length()").isEqualTo(1);
 	}
 
 	@Test
 	public void getHotelNotFound() {
-
-        client.get()
-            .uri("/hotel-composite/" + HOTEL_ID_NOT_FOUND)
-            .accept(APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isNotFound()
-            .expectHeader().contentType(APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.path").isEqualTo("/hotel-composite/" + HOTEL_ID_NOT_FOUND)
-            .jsonPath("$.message").isEqualTo("NOT FOUND: " + HOTEL_ID_NOT_FOUND);
+		getAndVerifyHotel(HOTEL_ID_NOT_FOUND, NOT_FOUND)
+        .jsonPath("$.path").isEqualTo("/hotel-composite/" +HOTEL_ID_NOT_FOUND)
+        .jsonPath("$.message").isEqualTo("NOT FOUND: " + HOTEL_ID_NOT_FOUND);
 	}
 
 	@Test
 	public void getHotelInvalidInput() {
-
-        client.get()
-            .uri("/hotel-composite/" + HOTEL_ID_INVALID)
-            .accept(APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
-            .expectHeader().contentType(APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.path").isEqualTo("/hotel-composite/" + HOTEL_ID_INVALID)
-            .jsonPath("$.message").isEqualTo("INVALID: " + HOTEL_ID_INVALID);
+		getAndVerifyHotel(HOTEL_ID_INVALID, UNPROCESSABLE_ENTITY)
+        .jsonPath("$.path").isEqualTo("/hotel-composite/" + HOTEL_ID_INVALID)
+        .jsonPath("$.message").isEqualTo("INVALID: " + HOTEL_ID_INVALID);
 	}
+	
+	private WebTestClient.BodyContentSpec getAndVerifyHotel(int hotelId, HttpStatus expectedStatus) {
+		return client.get()
+			.uri("/hotel-composite/" + hotelId)
+			.accept(APPLICATION_JSON)
+			.exchange()
+			.expectStatus().isEqualTo(expectedStatus)
+			.expectHeader().contentType(APPLICATION_JSON)
+			.expectBody();
+	}
+
+	private void postAndVerifyHotel(HotelAggregate compositeHotel, HttpStatus expectedStatus) {
+		client.post()
+			.uri("/hotel-composite")
+			.body(just(compositeHotel), HotelAggregate.class)
+			.exchange()
+			.expectStatus().isEqualTo(expectedStatus);
+	}
+
+	private void deleteAndVerifyHotel(int hotelId, HttpStatus expectedStatus) {
+		client.delete()
+			.uri("/hotel-composite/" + hotelId)
+			.exchange()
+			.expectStatus().isEqualTo(expectedStatus);
+	}
+
 }

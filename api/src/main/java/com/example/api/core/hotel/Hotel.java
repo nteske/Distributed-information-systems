@@ -3,12 +3,12 @@ package com.example.api.core.hotel;
 import java.sql.Date;
 
 public class Hotel {
-    private final int hotelId;
-    private final String title;
-	private final String description;
-	private final String image;
-    private final Date createdOn;	
-    private final String serviceAddress;
+    private int hotelId;
+    private String title;
+	private String description;
+	private String image;
+    private Date createdOn;	
+    private String serviceAddress;
 
     public Hotel() {
         hotelId = 0;
@@ -57,5 +57,29 @@ public class Hotel {
     
     public String getServiceAddress() {
         return serviceAddress;
+    }
+
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public void setServiceAddress(String serviceAddress) {
+        this.serviceAddress = serviceAddress;
     }
 }

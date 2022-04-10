@@ -9,6 +9,13 @@ public class ReviewSummary {
     private final String description;
     private final Date createdOn;
 
+    public ReviewSummary() {
+        this.reviewId = 0;
+        this.rating = 0;
+        this.description = null;
+        this.createdOn = null;
+    }
+
     public ReviewSummary(int reviewId, int rating , String description, Date createdOn) {
         this.reviewId = reviewId;
         this.rating = rating;

@@ -7,6 +7,13 @@ public class LocationSummary {
     private final String town;
     private final String address;
 
+    public LocationSummary() {
+        this.locationId = 0;
+        this.country = null;
+        this.town = null;
+        this.address = null;
+    }
+
     public LocationSummary(int locationId, String country, String town, String address) {
         this.locationId = locationId;
         this.country = country;

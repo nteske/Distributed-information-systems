@@ -14,6 +14,18 @@ public class HotelAggregate {
 	private final List<RoomSummary> room;
     private final ServiceAddresses serviceAddresses;
 
+    public HotelAggregate(){
+        this.hotelId = 0;
+        this.title = null;
+        this.description = null;
+        this.image = null;
+        this.createdOn = null;
+        this.location = null;
+        this.reviews = null;
+		this.room = null;
+        this.serviceAddresses = null;   
+    }
+
     public HotelAggregate(
         int hotelId,
         String title,

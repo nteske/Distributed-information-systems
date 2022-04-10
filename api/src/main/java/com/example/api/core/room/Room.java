@@ -1,12 +1,12 @@
 package com.example.api.core.room;
 
 public class Room {
-    private final int hotelId;
-    private final int roomId;
-    private final int roomNumber;
-    private final int beds;
-	private final float price;
-    private final String serviceAddress;
+    private int hotelId;
+    private int roomId;
+    private int roomNumber;
+    private int beds;
+	private float price;
+    private String serviceAddress;
 
     public Room() {
     	hotelId = 0;
@@ -17,7 +17,31 @@ public class Room {
         serviceAddress = null;
     }
 
-    public Room(
+    public void setHotelId(int hotelId) {
+		this.hotelId = hotelId;
+	}
+
+	public void setRoomId(int roomId) {
+		this.roomId = roomId;
+	}
+
+	public void setRoomNumber(int roomNumber) {
+		this.roomNumber = roomNumber;
+	}
+
+	public void setBeds(int beds) {
+		this.beds = beds;
+	}
+
+	public void setPrice(float price) {
+		this.price = price;
+	}
+
+	public void setServiceAddress(String serviceAddress) {
+		this.serviceAddress = serviceAddress;
+	}
+
+	public Room(
     	int hotelId,
     	int roomId,
     	int roomNumber,

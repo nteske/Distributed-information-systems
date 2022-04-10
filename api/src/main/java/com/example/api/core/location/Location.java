@@ -1,14 +1,14 @@
 package com.example.api.core.location;
 
 public class Location {
-    private final int hotelId;
-    private final int locationId;
+    private int hotelId;
+    private int locationId;
 
-    private final String country;
-    private final String town;
-    private final String address;
+    private String country;
+    private String town;
+    private String address;
 
-    private final String serviceAddress;
+    private String serviceAddress;
 
     public Location() {
         hotelId = 0;
@@ -17,6 +17,30 @@ public class Location {
         town = null;
         address = null;
         serviceAddress = null;
+    }
+
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
+    }
+
+    public void setLocationId(int locationId) {
+        this.locationId = locationId;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public void setTown(String town) {
+        this.town = town;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setServiceAddress(String serviceAddress) {
+        this.serviceAddress = serviceAddress;
     }
 
     public Location(

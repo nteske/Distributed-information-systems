@@ -3,12 +3,12 @@ package com.example.api.core.review;
 import java.sql.Date;
 
 public class Review {
-    private final int hotelId;
-    private final int reviewId;
-    private final int rating;
-    private final String description;
-    private final Date createdOn;
-    private final String serviceAddress;
+    private int hotelId;
+    private int reviewId;
+    private int rating;
+    private String description;
+    private Date createdOn;
+    private String serviceAddress;
 
     public Review() {
         hotelId = 0;
@@ -17,6 +17,30 @@ public class Review {
         description = null;
         createdOn = null;
         serviceAddress = null;
+    }
+
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
+    }
+
+    public void setReviewId(int reviewId) {
+        this.reviewId = reviewId;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public void setServiceAddress(String serviceAddress) {
+        this.serviceAddress = serviceAddress;
     }
 
     public Review(

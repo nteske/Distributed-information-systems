@@ -59,16 +59,34 @@ public class HotelCompositeIntegration implements HotelService, RoomService, Rev
         this.mapper = mapper;
 
         hotelServiceUrl        = "http://" + hotelServiceHost + ":" + hotelServicePort + "/hotel/";
-        locationServiceUrl = "http://" + locationServiceHost + ":" + locationServicePort + "/location?hotelId=";
-        reviewServiceUrl         = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review?hotelId=";
-        roomServiceUrl    = "http://" + roomServiceHost + ":" + roomServicePort + "/room?hotelId=";
+        locationServiceUrl = "http://" + locationServiceHost + ":" + locationServicePort + "/location";
+        reviewServiceUrl         = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review";
+        roomServiceUrl    = "http://" + roomServiceHost + ":" + roomServicePort + "/room";
     }
 
+        
+    @Override
+    public Hotel createHotel(Hotel body) {
+
+        try {
+            String url = hotelServiceUrl;
+            LOG.debug("Will post a new hotel to URL: {}", url);
+
+            Hotel hotel = restTemplate.postForObject(url, body, Hotel.class);
+            LOG.debug("Created a hotel with id: {}", hotel.getHotelId());
+
+            return hotel;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+    @Override
     public Hotel getHotel(int hotelId) {
 
         try {
-            String url = hotelServiceUrl + hotelId;
-            LOG.debug("Will call getHotel API on URL: {}", url);
+            String url = hotelServiceUrl + "/" + hotelId;
+            LOG.debug("Will call the getMHotel API on URL: {}", url);
 
             Hotel hotel = restTemplate.getForObject(url, Hotel.class);
             LOG.debug("Found a hotel with id: {}", hotel.getHotelId());
@@ -76,37 +94,44 @@ public class HotelCompositeIntegration implements HotelService, RoomService, Rev
             return hotel;
 
         } catch (HttpClientErrorException ex) {
-
-            switch (ex.getStatusCode()) {
-
-            case NOT_FOUND:
-                throw new NotFoundException(getErrorMessage(ex));
-
-            case UNPROCESSABLE_ENTITY :
-                throw new InvalidInputException(getErrorMessage(ex));
-
-            default:
-                LOG.warn("Got a unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
-                LOG.warn("Error body: {}", ex.getResponseBodyAsString());
-                throw ex;
-            }
+            throw handleHttpClientException(ex);
         }
     }
-
-    private String getErrorMessage(HttpClientErrorException ex) {
+    
+    @Override
+    public void deleteHotel(int hotelId) {
         try {
-            return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
-        } catch (IOException ioex) {
-            return ex.getMessage();
+            String url = hotelServiceUrl + "/" + hotelId;
+            LOG.debug("Will call the deleteHotel API on URL: {}", url);
+            restTemplate.delete(url);
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
         }
     }
 
+    @Override
+    public Location createLocation(Location body) {
+        try {
+        	String url = locationServiceUrl;
+            LOG.debug("Will post a new location to URL: {}", url);
+
+            Location location = restTemplate.postForObject(url, body, Location.class);
+            LOG.debug("Created a location with id: {}", location.getLocationId());
+
+            return location;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
     public List<Location> getLocation(int hotelId) {
 
         try {
-            String url = locationServiceUrl + hotelId;
+            String url = locationServiceUrl + "?hotelId=" + hotelId;
 
-            LOG.debug("Will call getLocation API on URL: {}", url);
+            LOG.debug("Will call the getLocation API on URL: {}", url);
             List<Location> location = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Location>>() {}).getBody();
 
             LOG.debug("Found {} location for hotel with id: {}", location.size(), hotelId);
@@ -118,12 +143,42 @@ public class HotelCompositeIntegration implements HotelService, RoomService, Rev
         }
     }
 
+    @Override
+    public void deleteLocations(int hotelId) {
+        try {
+            String url = locationServiceUrl + "?hotelId=" + hotelId;
+            LOG.debug("Will call the deleteLocations API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
+    public Review createReview(Review body) {
+        try {
+        	String url = reviewServiceUrl;
+            LOG.debug("Will post a new review to URL: {}", url);
+
+            Review review = restTemplate.postForObject(url, body, Review.class);
+            LOG.debug("Created a review with id: {}", review.getReviewId());
+
+            return review;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
     public List<Review> getReviews(int hotelId) {
 
         try {
-            String url = reviewServiceUrl + hotelId;
+            String url = reviewServiceUrl + "?hotelId=" + hotelId;
 
-            LOG.debug("Will call getReviews API on URL: {}", url);
+            LOG.debug("Will call the getReviews API on URL: {}", url);
             List<Review> reviews = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Review>>() {}).getBody();
 
             LOG.debug("Found {} reviews for hotel with id: {}", reviews.size(), hotelId);
@@ -135,12 +190,42 @@ public class HotelCompositeIntegration implements HotelService, RoomService, Rev
         }
     }
 
+    @Override
+    public void deleteReviews(int hotelId) {
+        try {
+            String url = reviewServiceUrl + "?hotelId=" + hotelId;
+            LOG.debug("Will call the deleteReviews API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
+    public Room createRoom(Room body) {
+        try {
+        	String url = roomServiceUrl;
+            LOG.debug("Will post a new room to URL: {}", url);
+
+            Room room = restTemplate.postForObject(url, body, Room.class);
+            LOG.debug("Created a room with id: {}", room.getRoomId());
+
+            return room;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
 	public List<Room> getRoom(int hotelId) {
 		
 		try {
-            String url = roomServiceUrl + hotelId;
+            String url = roomServiceUrl  + "?hotelId=" + hotelId;
 
-            LOG.debug("Will call getRoom API on URL: {}", url);
+            LOG.debug("Will call the getRoom API on URL: {}", url);
             List<Room> room = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Room>>() {}).getBody();
 
             LOG.debug("Found {} room for hotel with id: {}", room.size(), hotelId);
@@ -151,4 +236,42 @@ public class HotelCompositeIntegration implements HotelService, RoomService, Rev
             return new ArrayList<>();
         }
 	}
+
+    @Override
+    public void deleteRooms(int hotelId) {
+        try {
+            String url = roomServiceUrl + "?hotelId=" + hotelId;
+            LOG.debug("Will call the deleteRooms API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    private RuntimeException handleHttpClientException(HttpClientErrorException ex) {
+        switch (ex.getStatusCode()) {
+
+        case NOT_FOUND:
+            return new NotFoundException(getErrorMessage(ex));
+
+        case UNPROCESSABLE_ENTITY :
+            return new InvalidInputException(getErrorMessage(ex));
+
+        default:
+            LOG.warn("Got a unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
+            LOG.warn("Error body: {}", ex.getResponseBodyAsString());
+            return ex;
+        }
+    }
+
+    
+    private String getErrorMessage(HttpClientErrorException ex) {
+        try {
+            return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
+        } catch (IOException ioex) {
+            return ex.getMessage();
+        }
+    }
 }
