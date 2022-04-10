@@ -31,6 +31,6 @@ public class HotelServiceImpl implements HotelService {
 
         if (hotelId == 13) throw new NotFoundException("No hotel found for hotelId: " + hotelId);
         
-        return Hotel(hotelId, "Crystal Hotel", "Place where comfort meets luxury.", "https://placekitten.com/200/300", Date.valueOf("2021-08-13"), serviceUtil.getServiceAddress());
+        return new Hotel(hotelId, "Crystal Hotel", "Place where comfort meets luxury.", "https://placekitten.com/200/300", Date.valueOf("2021-08-13"), serviceUtil.getServiceAddress());
     }
 }

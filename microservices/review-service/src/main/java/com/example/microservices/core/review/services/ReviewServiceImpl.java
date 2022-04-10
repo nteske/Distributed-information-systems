@@ -1,5 +1,7 @@
 package com.example.microservices.core.review.services;
 
+import java.sql.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getReview(int hotelId) {
+    public List<Review> getReviews(int hotelId) {
 
         if (hotelId < 1) throw new InvalidInputException("Invalid hitelId: " + hotelId);
 
