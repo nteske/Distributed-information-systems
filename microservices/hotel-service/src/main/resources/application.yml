@@ -4,7 +4,7 @@ server.error.include-message: always
 spring.data.mongodb:
   host: localhost
   port: 27017
-  database: movie-db
+  database: hotel-db
 
 logging:
   level:
