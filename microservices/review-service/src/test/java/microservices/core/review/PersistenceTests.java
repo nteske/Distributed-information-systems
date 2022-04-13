@@ -43,7 +43,7 @@ public class PersistenceTests {
     @Test
    	public void create() {
 
-        ReviewEntity newEntity = new ReviewEntity(1, 2, 3, "Great", Date.valueOf("2021-08-12"));
+        ReviewEntity newEntity = new ReviewEntity(1, 3, 3, "Great", Date.valueOf("2021-08-12"));
         repository.save(newEntity);
 
         ReviewEntity foundEntity = repository.findById(newEntity.getId()).get();

@@ -58,8 +58,9 @@ public class LocationServiceImpl implements LocationService {
     }
     
     @Override
-    public void deleteLocation(int hotelId) {
+    public void deleteLocations(int hotelId) {
         LOG.debug("deleteLocation: tries to delete location for the hotel with hotelId: {}", hotelId);
         repository.deleteAll(repository.findByHotelId(hotelId));
     }
+
 }

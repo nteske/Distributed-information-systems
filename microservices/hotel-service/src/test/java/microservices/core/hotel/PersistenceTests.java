@@ -45,7 +45,7 @@ public class PersistenceTests {
 
     @Test
    	public void create() {
-        HotelEntity newEntity = new HotelEntity(1, "n","d","i", Date.valueOf("2021-08-12"));
+        HotelEntity newEntity = new HotelEntity(2, "n","d","i", Date.valueOf("2021-08-12"));
         repository.save(newEntity);
 
         HotelEntity foundEntity = repository.findById(newEntity.getId()).get();

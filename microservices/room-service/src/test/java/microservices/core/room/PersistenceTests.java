@@ -1,4 +1,4 @@
-package microservices.core.location;
+package microservices.core.room;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -8,7 +8,8 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
-import com.example.microservices.core.location.persistence.*;
+import com.example.microservices.core.room.persistence.RoomEntity;
+import com.example.microservices.core.room.persistence.RoomRepository;
 
 import java.util.List;
 
@@ -20,42 +21,41 @@ import static org.junit.Assert.*;
 public class PersistenceTests {
 
     @Autowired
-    private LocationRepository repository;
+    private RoomRepository repository;
 
-    private LocationEntity savedEntity;
+    private RoomEntity savedEntity;
 
     @Before
    	public void setupDb() {
    		repository.deleteAll();
 
-        LocationEntity entity = new LocationEntity(1, 2, "Country","Town","Address");
-
+   		RoomEntity entity = new RoomEntity(1, 2, 315,32,233);
         savedEntity = repository.save(entity);
 
-        assertEqualsLocation(entity, savedEntity);
+        assertEqualsRecommendation(entity, savedEntity);
     }
 
 
     @Test
    	public void create() {
 
-    	LocationEntity newEntity = new LocationEntity(1, 3, "Country","Town","Address");
+    	RoomEntity newEntity = new RoomEntity(1, 3, 315,32,233);
         repository.save(newEntity);
 
-        LocationEntity foundEntity = repository.findById(newEntity.getId()).get();
-        assertEqualsLocation(newEntity, foundEntity);
+        RoomEntity foundEntity = repository.findById(newEntity.getId()).get();
+        assertEqualsRecommendation(newEntity, foundEntity);
 
         assertEquals(2, repository.count());
     }
 
     @Test
    	public void update() {
-        savedEntity.setCountry("a2");
+        savedEntity.setBeds(5);
         repository.save(savedEntity);
 
-        LocationEntity foundEntity = repository.findById(savedEntity.getId()).get();
+        RoomEntity foundEntity = repository.findById(savedEntity.getId()).get();
         assertEquals(1, (long)foundEntity.getVersion());
-        assertEquals("a2", foundEntity.getCountry());
+        assertEquals(5, foundEntity.getBeds());
     }
 
     @Test
@@ -66,15 +66,15 @@ public class PersistenceTests {
 
     @Test
    	public void getByHotelId() {
-        List<LocationEntity> entityList = repository.findByHotelId(savedEntity.getHotelId());
+        List<RoomEntity> entityList = repository.findByHotelId(savedEntity.getHotelId());
 
         assertThat(entityList, hasSize(1));
-        assertEqualsLocation(savedEntity, entityList.get(0));
+        assertEqualsRecommendation(savedEntity, entityList.get(0));
     }
 
     @Test(expected = DuplicateKeyException.class)
    	public void duplicateError() {
-    	LocationEntity entity = new LocationEntity(1, 2, "Country","Town","Address");
+    	RoomEntity entity = new RoomEntity(1, 2, 315,32,233);
         repository.save(entity);
     }
 
@@ -82,35 +82,35 @@ public class PersistenceTests {
    	public void optimisticLockError() {
 
         // Store the saved entity in two separate entity objects
-    	LocationEntity entity1 = repository.findById(savedEntity.getId()).get();
-    	LocationEntity entity2 = repository.findById(savedEntity.getId()).get();
+    	RoomEntity entity1 = repository.findById(savedEntity.getId()).get();
+    	RoomEntity entity2 = repository.findById(savedEntity.getId()).get();
 
         // Update the entity using the first entity object
-        entity1.setCountry("a1");
+        entity1.setBeds(19);
         repository.save(entity1);
 
         //  Update the entity using the second entity object.
         // This should fail since the second entity now holds a old version number, i.e. a Optimistic Lock Error
         try {
-            entity2.setCountry("a2");
+            entity2.setBeds(33);
             repository.save(entity2);
 
             fail("Expected an OptimisticLockingFailureException");
         } catch (OptimisticLockingFailureException e) {}
 
         // Get the updated entity from the database and verify its new sate
-        LocationEntity updatedEntity = repository.findById(savedEntity.getId()).get();
+        RoomEntity updatedEntity = repository.findById(savedEntity.getId()).get();
         assertEquals(1, (int)updatedEntity.getVersion());
-        assertEquals("a1", updatedEntity.getCountry());
+        assertEquals(19, updatedEntity.getBeds());
     }
 
-    private void assertEqualsLocation(LocationEntity expectedEntity, LocationEntity actualEntity) {
+    private void assertEqualsRecommendation(RoomEntity expectedEntity, RoomEntity actualEntity) {
         assertEquals(expectedEntity.getId(),               actualEntity.getId());
         assertEquals(expectedEntity.getVersion(),          actualEntity.getVersion());
         assertEquals(expectedEntity.getHotelId(),        actualEntity.getHotelId());
-        assertEquals(expectedEntity.getLocationId(), actualEntity.getLocationId());
-        assertEquals(expectedEntity.getCountry(),           actualEntity.getCountry());
-        assertEquals(expectedEntity.getTown(),           actualEntity.getTown());
-        assertEquals(expectedEntity.getAddress(),          actualEntity.getAddress());
+        assertEquals(expectedEntity.getRoomId(), actualEntity.getRoomId());
+        assertEquals(expectedEntity.getRoomNumber(),          actualEntity.getRoomNumber());
+        assertEquals(expectedEntity.getBeds(),           actualEntity.getBeds());
+        assertEquals(0.0012f, expectedEntity.getPrice(),           actualEntity.getPrice());
     }
 }
