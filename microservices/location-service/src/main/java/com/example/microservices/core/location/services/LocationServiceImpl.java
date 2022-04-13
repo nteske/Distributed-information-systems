@@ -40,7 +40,7 @@ public class LocationServiceImpl implements LocationService {
             LOG.debug("createLocation: created a location entity: {}/{}", body.getHotelId(), body.getLocationId());
             return mapper.entityToApi(newEntity);
         } catch (DuplicateKeyException dke) {
-            throw new InvalidInputException("Duplicate key, Movie Id: " + body.getHotelId() + ", Location Id:" + body.getLocationId());
+            throw new InvalidInputException("Duplicate key, Hotel Id: " + body.getHotelId() + ", Location Id:" + body.getLocationId());
         }
     }
     

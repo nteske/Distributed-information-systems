@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface LocationRepository extends CrudRepository<LocationEntity, String> {
-    List<LocationEntity> findByMovieId(int movieId);
+    List<LocationEntity> findByHotelId(int hotelId);
 }
