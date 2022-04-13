@@ -100,7 +100,7 @@ fi
 
 waitForService http://$HOST:$PORT/hotel-composite/1
 
-# Verify that a normal request works, expect three trivia, three reviews and three rooms
+# Verify that a normal request works, expect three locations, three reviews and three rooms
 assertCurl 200 "curl http://$HOST:$PORT/hotel-composite/1 -s"
 assertEqual 1 $(echo $RESPONSE | jq .hotelId)
 assertEqual 3 $(echo $RESPONSE | jq ".location | length")

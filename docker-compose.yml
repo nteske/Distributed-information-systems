@@ -25,7 +25,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-  room-credit:
+  room:
     build: microservices/room-service
     mem_limit: 350m
     environment:

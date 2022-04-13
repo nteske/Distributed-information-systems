@@ -94,7 +94,7 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
     @Override
     public void deleteCompositeHotel(int hotelId) {
 
-        LOG.debug("deleteCompositeHotel: Deletes a movie aggregate for hotelId: {}", hotelId);
+        LOG.debug("deleteCompositeHotel: Deletes a hotel aggregate for hotelId: {}", hotelId);
 
         integration.deleteHotel(hotelId);
 

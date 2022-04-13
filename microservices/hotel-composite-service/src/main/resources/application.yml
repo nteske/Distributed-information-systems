@@ -33,7 +33,7 @@ api:
       description: Creates a composite hotel
       notes: |
         # Normal response
-        The composite hotel information posted to the API will be split up and stored as separate hotel-info, location, crazy credit and review entities.
+        The composite hotel information posted to the API will be split up and stored as separate hotel-info, location, room and review entities.
         # Expected error responses
         1. If a hotel with the same hotelId as specified in the posted information already exists,
            an <b>422 - Unprocessable Entity</b> error with a "duplicate key" error message will be returned
