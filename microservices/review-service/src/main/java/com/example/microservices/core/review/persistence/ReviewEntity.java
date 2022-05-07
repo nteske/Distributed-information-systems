@@ -1,8 +1,9 @@
 package com.example.microservices.core.review.persistence;
 
-import java.sql.Date;
+import java.util.Date;
 
 import javax.persistence.*;
+import static java.lang.String.format;
 
 @Entity
 @Table(name = "reviews", indexes = { @Index(name = "reviews_unique_idx", unique = true, columnList = "hotelId,reviewId") })
@@ -35,6 +36,11 @@ public class ReviewEntity {
         this.rating = rating;
         this.description = description;
         this.createdOn = createdOn;
+    }
+
+    @Override
+    public String toString() {
+        return format("ReviewEntity: %s/%d", hotelId, reviewId);
     }
 
 	public int getId() {

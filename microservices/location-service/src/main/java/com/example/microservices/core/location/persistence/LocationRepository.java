@@ -1,9 +1,8 @@
 package com.example.microservices.core.location.persistence;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
-
-public interface LocationRepository extends CrudRepository<LocationEntity, String> {
-    List<LocationEntity> findByHotelId(int hotelId);
+public interface LocationRepository extends ReactiveCrudRepository<LocationEntity, String> {
+    Flux<LocationEntity> findByHotelId(int hotelId);
 }

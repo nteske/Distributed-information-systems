@@ -2,6 +2,8 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 .libraries
+.vscode
+bin
 
 ### STS ###
 .apt_generated
@@ -17,7 +19,7 @@
 *.iws
 *.iml
 *.ipr
-/out/
+out
 
 ### NetBeans ###
 /nbproject/private/
@@ -26,4 +28,4 @@
 /nbdist/
 /.nb-gradle/
 .DS_Store
-ML_*
+ML-labb

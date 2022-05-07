@@ -1,12 +1,15 @@
 package com.example.microservices.composite.hotel;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.client.RestTemplate;
+import com.example.microservices.composite.hotel.services.HotelCompositeIntegration;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -17,6 +20,7 @@ import static java.util.Collections.emptyList;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static springfox.documentation.builders.RequestHandlerSelectors.basePackage;
 import static springfox.documentation.spi.DocumentationType.SWAGGER_2;
+
 @SpringBootApplication
 @ComponentScan("com.example")
 public class HotelCompositeServiceApplication {
@@ -59,12 +63,16 @@ public class HotelCompositeServiceApplication {
                 ));
     }
 
-
+	@Autowired
+	HotelCompositeIntegration integration;
+	
 	@Bean
-	RestTemplate restTemplate() {
-		return new RestTemplate();
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		final WebClient.Builder builder = WebClient.builder();
+		return builder;
 	}
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(HotelCompositeServiceApplication.class, args);
 	}

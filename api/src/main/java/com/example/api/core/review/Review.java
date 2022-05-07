@@ -1,6 +1,6 @@
 package com.example.api.core.review;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class Review {
     private int hotelId;

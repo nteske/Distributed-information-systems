@@ -1,9 +1,8 @@
 package com.example.microservices.core.hotel.persistence;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
-public interface HotelRepository extends PagingAndSortingRepository<HotelEntity, String> {
-    Optional<HotelEntity> findByHotelId(int hotelId);
+public interface HotelRepository extends ReactiveCrudRepository<HotelEntity, String> {
+    Mono<HotelEntity> findByHotelId(int hotelId);
 }

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import reactor.core.publisher.Mono;
 
 @Api(description = "REST API for composite hotel information.")
 
@@ -50,8 +51,7 @@ public interface HotelCompositeService {
     @GetMapping(
         value    = "/hotel-composite/{hotelId}",
         produces = "application/json")
-    HotelAggregate getCompositeHotel(@PathVariable int hotelId);
-
+	Mono<HotelAggregate> getCompositeHotel(@PathVariable int hotelId);
 
     /**
      * Sample usage:

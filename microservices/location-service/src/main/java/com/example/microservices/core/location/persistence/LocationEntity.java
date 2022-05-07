@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import static java.lang.String.format;
+
 @Document(collection="location")
 @CompoundIndex(name = "hot-loc-id", unique = true, def = "{'hotelId': 1, 'locationId' : 1}")
 public class LocationEntity {
@@ -39,6 +41,11 @@ public class LocationEntity {
         this.country = country;
         this.town = town;
         this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return format("LocationEntity: %s/%d", hotelId, locationId);
     }
 
     public String getId() {

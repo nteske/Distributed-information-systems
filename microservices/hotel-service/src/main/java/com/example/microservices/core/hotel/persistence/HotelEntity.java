@@ -1,10 +1,12 @@
 package com.example.microservices.core.hotel.persistence;
-import java.sql.Date;
+import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import static java.lang.String.format;
 
 @Document(collection="hotels")
 public class HotelEntity {
@@ -38,6 +40,12 @@ public class HotelEntity {
     	this.description = description;
     	this.image = image;
     	this.createdOn = createdOn;
+    }
+
+
+    @Override
+    public String toString() {
+        return format("HotelEntity: %s", hotelId);
     }
 
     public String getId() {
@@ -92,7 +100,7 @@ public class HotelEntity {
         this.image = image;
      }
 
-	public void setReleaseDate(Date createdOn) {
+	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
 }

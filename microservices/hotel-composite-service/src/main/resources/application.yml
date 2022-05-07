@@ -47,40 +47,70 @@ api:
 server.port: 7000
 server.error.include-message: always
 
-app:
-  hotel-service:
-    host: localhost
-    port: 7001
-  location-service:
-    host: localhost
-    port: 7002
-  review-service:
-    host: localhost
-    port: 7003
-  room-service:
-    host: localhost
-    port: 7004
+spring.application.name: hotel-composite
 
+app.eureka-server: localhost
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+ribbon.ServerListRefreshInterval: 5000
+
+ribbon.NFLoadBalancerPingInterval: 5
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings:
+    output-hotels:
+      destination: hotels
+      producer:
+        required-groups: auditGroup
+    output-location:
+      destination: location
+      producer:
+        required-groups: auditGroup
+    output-reviews:
+      destination: reviews
+      producer:
+        required-groups: auditGroup
+    output-rooms:
+      destination: rooms
+      producer:
+        required-groups: auditGroup
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
 logging:
   level:
     root: INFO
     com.example: DEBUG
 
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
 ---
 spring.profiles: docker
 
 server.port: 8080
 
-app:
-  hotel-service:
-    host: hotel
-    port: 8080
-  location-service:
-    host: location
-    port: 8080
-  review-service:
-    host: review
-    port: 8080
-  room-service:
-    host: room
-    port: 8080
+eureka.client.serviceUrl.defaultZone: http://eureka:8761/eureka/
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka
+
+app.eureka-server: eureka

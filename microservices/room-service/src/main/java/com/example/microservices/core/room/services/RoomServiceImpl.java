@@ -7,6 +7,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.microservices.core.room.persistence.RoomEntity;
 import com.example.microservices.core.room.persistence.RoomRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import com.example.api.core.room.*;
 import com.example.util.exceptions.*;
@@ -34,35 +36,33 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Room createRoom(Room body) {
-        try {
-        	RoomEntity entity = mapper.apiToEntity(body);
-        	RoomEntity newEntity = repository.save(entity);
+    	if (body.getHotelId() < 1) throw new InvalidInputException("Invalid hotelId: " + body.getHotelId());
 
-            LOG.debug("createRoom: created a room entity: {}/{}", body.getHotelId(), body.getRoomId());
-            return mapper.entityToApi(newEntity);
-
-        } catch (DuplicateKeyException dke) {
-            throw new InvalidInputException("Duplicate key, Hotel Id: " + body.getHotelId() + ", Room Id:" + body.getRoomId());
-        }
+        RoomEntity entity = mapper.apiToEntity(body);
+        Mono<Room> newEntity = repository.save(entity)
+            .log()
+            .onErrorMap(
+                DuplicateKeyException.class,
+                ex -> new InvalidInputException("Duplicate key, Hotel Id: " + body.getHotelId() + ", room Id:" + body.getRoomId()))
+            .map(e -> mapper.entityToApi(e));
+        return newEntity.block();
     }
 
     @Override
-    public List<Room> getRoom(int hotelId) {
+    public Flux<Room> getRoom(int hotelId) {
 
         if (hotelId < 1) throw new InvalidInputException("Invalid hotelId: " + hotelId);
 
-        List<RoomEntity> entityList = repository.findByHotelId(hotelId);
-        List<Room> list = mapper.entityListToApiList(entityList);
-        list.forEach(e -> e.setServiceAddress(serviceUtil.getServiceAddress()));
-
-        LOG.debug("getRooms: response size: {}", list.size());
-
-        return list;
+        return repository.findByHotelId(hotelId)
+                .log()
+                .map(e -> mapper.entityToApi(e))
+                .map(e -> {e.setServiceAddress(serviceUtil.getServiceAddress()); return e;});
     }
 
     @Override
     public void deleteRooms(int hotelId) {
+        if (hotelId < 1) throw new InvalidInputException("Invalid hotelId: " + hotelId);
         LOG.debug("deleteRooms: tries to delete room for the hotel with hotelId: {}", hotelId);
-        repository.deleteAll(repository.findByHotelId(hotelId));
+        repository.deleteAll(repository.findByHotelId(hotelId)).block();
     }
 }

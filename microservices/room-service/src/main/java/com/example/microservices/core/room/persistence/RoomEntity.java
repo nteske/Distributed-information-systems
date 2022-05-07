@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import static java.lang.String.format;
+
 @Document(collection="rooms")
 @CompoundIndex(name = "hot-roo-id", unique = true, def = "{'hotelId': 1, 'roomId' : 1}")
 public class RoomEntity {
@@ -37,6 +39,11 @@ public class RoomEntity {
         this.roomNumber = roomNumber;
         this.beds = beds;
         this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return format("RoomEntity: %s/%d", hotelId, roomId);
     }
 
 	public String getId() {

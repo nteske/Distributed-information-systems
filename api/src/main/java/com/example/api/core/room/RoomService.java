@@ -2,7 +2,7 @@ package com.example.api.core.room;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import reactor.core.publisher.Flux;
 
 public interface RoomService {
 
@@ -31,16 +31,8 @@ public interface RoomService {
     @GetMapping(
         value    = "/room",
         produces = "application/json")
-    List<Room> getRoom(@RequestParam(value = "hotelId", required = true) int hotelId);
+    Flux<Room> getRoom(@RequestParam(value = "hotelId", required = true) int hotelId);
         
-    /**
-     * Sample usage:
-     *
-     * curl -X DELETE $HOST:$PORT/room?hotelId=1
-     *
-     * @param hotelId
-     */
-    @DeleteMapping(value = "/room")
     void deleteRooms(@RequestParam(value = "hotelId", required = true)  int hotelId);
 
 }

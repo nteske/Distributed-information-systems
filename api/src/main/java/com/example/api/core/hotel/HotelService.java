@@ -1,22 +1,9 @@
 package com.example.api.core.hotel;
 
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 public interface HotelService {
-    /**
-     * Sample usage:
-     *
-     * curl -X POST $HOST:$PORT/hotel \
-     *   -H "Content-Type: application/json" --data \
-     *   '{"hotelId":123,"title":"Title 123","description":"Description","image":"http://www.image.com","createdOn":"2021-08-12"}'
-     *
-     * @param body
-     * @return
-     */
-    @PostMapping(
-        value    = "/hotel",
-        consumes = "application/json",
-        produces = "application/json")
     Hotel createHotel(@RequestBody Hotel body);
 	
     /**
@@ -28,16 +15,8 @@ public interface HotelService {
     @GetMapping(
         value    = "/hotel/{hotelId}",
         produces = "application/json")
-     Hotel getHotel(@PathVariable int hotelId);
-         
-    /**
-     * Sample usage:
-     *
-     * curl -X DELETE $HOST:$PORT/hotel/1
-     *
-     * @param hotelId
-     */
-    @DeleteMapping(value = "/hotel/{hotelId}")
+     Mono<Hotel> getHotel(@PathVariable int hotelId);
+
     void deleteHotel(@PathVariable int hotelId);
 
 }
