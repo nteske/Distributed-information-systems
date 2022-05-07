@@ -129,6 +129,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
   eureka:
     build: spring-cloud/eureka-server
     mem_limit: 350m
@@ -140,6 +141,7 @@ services:
     mem_limit: 350m
     ports:
       - "8080:8080"
+      
   # $ mongo
   mongodb:
     image: mongo:3.6.9

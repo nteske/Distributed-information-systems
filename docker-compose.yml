@@ -33,6 +33,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
   room:
     build: microservices/room-service
     mem_limit: 350m
@@ -56,9 +57,6 @@ services:
   eureka:
     build: spring-cloud/eureka-server
     mem_limit: 350m
-    ports:
-      - "8761:8761"
-
   gateway:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -66,6 +64,7 @@ services:
     mem_limit: 350m
     ports:
       - "8080:8080"
+
   # $ mongo
   mongodb:
     image: mongo:3.6.9
