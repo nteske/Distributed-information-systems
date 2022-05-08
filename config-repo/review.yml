@@ -1,4 +1,4 @@
-server.port: 7002
+server.port: 7003
 server.error.include-message: always
 
 # Strongly recommend to set this property to "none" in a production environment!
@@ -35,6 +35,8 @@ logging:
   level:
     root: INFO
     com.example: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 ---
 spring.profiles: docker
