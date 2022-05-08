@@ -7,7 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import com.example.microservices.composite.hotel.services.HotelCompositeIntegration;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -62,9 +61,6 @@ public class HotelCompositeServiceApplication {
                     emptyList()
                 ));
     }
-
-	@Autowired
-	HotelCompositeIntegration integration;
 	
 	@Bean
 	@LoadBalanced

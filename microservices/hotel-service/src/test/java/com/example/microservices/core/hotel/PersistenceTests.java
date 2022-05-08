@@ -15,7 +15,7 @@ import com.example.microservices.core.hotel.persistence.HotelRepository;
 import java.util.Date;
 
 @RunWith(SpringRunner.class)
-@DataMongoTest
+@DataMongoTest(properties = {"spring.cloud.config.enabled=false"})
 public class PersistenceTests {
 
     @Autowired

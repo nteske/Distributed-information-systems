@@ -31,7 +31,7 @@ public interface HotelCompositeService {
     @PostMapping(
         value    = "/hotel-composite",
         consumes = "application/json")
-    void createCompositeHotel(@RequestBody HotelAggregate body);
+    Mono<Void> createCompositeHotel(@RequestBody HotelAggregate body);
 	
 	
     /**
@@ -51,7 +51,11 @@ public interface HotelCompositeService {
     @GetMapping(
         value    = "/hotel-composite/{hotelId}",
         produces = "application/json")
-	Mono<HotelAggregate> getCompositeHotel(@PathVariable int hotelId);
+    Mono<HotelAggregate> getCompositeHotel(
+            @PathVariable int hotelId,
+            @RequestParam(value = "delay", required = false, defaultValue = "0") int delay,
+            @RequestParam(value = "faultPercent", required = false, defaultValue = "0") int faultPercent
+    );
 
     /**
      * Sample usage:
@@ -68,5 +72,5 @@ public interface HotelCompositeService {
         @ApiResponse(code = 422, message = "Unprocessable entity, input parameters caused the processing to fail. See response message for more information.")
     })
     @DeleteMapping(value = "/hotel-composite/{hotelId}")
-    void deleteCompositeHotel(@PathVariable int hotelId);
+    Mono<Void> deleteCompositeHotel(@PathVariable int hotelId);
 }

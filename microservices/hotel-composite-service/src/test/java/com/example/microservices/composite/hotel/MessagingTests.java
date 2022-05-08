@@ -38,12 +38,11 @@ import static com.example.api.event.Event.Type.DELETE;
 import static com.example.microservices.composite.hotel.IsSameEvent.sameEventExceptCreatedAt;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"eureka.client.enabled=false"})
+@SpringBootTest(
+		webEnvironment=RANDOM_PORT,
+		classes = {HotelCompositeServiceApplication.class, TestSecurityConfig.class },
+		properties = {"spring.main.allow-bean-definition-overriding=true","eureka.client.enabled=false", "spring.cloud.config.enabled=false"})
 public class MessagingTests {
-
-	private static final int HOTEL_ID_OK = 1;
-	private static final int HOTEL_ID_NOT_FOUND = 2;
-	private static final int HOTEL_ID_INVALID = 3;
 
     @Autowired
     private WebTestClient client;

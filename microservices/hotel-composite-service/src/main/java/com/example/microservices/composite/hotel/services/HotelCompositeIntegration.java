@@ -1,9 +1,12 @@
 package com.example.microservices.composite.hotel.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
@@ -11,6 +14,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,6 +28,8 @@ import com.example.util.exceptions.NotFoundException;
 import com.example.util.http.HttpErrorInfo;
 
 import java.io.IOException;
+import java.net.URI;
+import java.time.Duration;
 
 import static reactor.core.publisher.Flux.empty;
 import static com.example.api.event.Event.Type.CREATE;
@@ -45,7 +51,9 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
     
     private WebClient webClient;
     
-    private MessageSources messageSources;
+    private final MessageSources messageSources;
+
+    private final int hotelServiceTimeoutSec;
 
     public interface MessageSources {
 
@@ -71,11 +79,13 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
     public HotelCompositeIntegration(
     	WebClient.Builder webClientBuilder,
         ObjectMapper mapper,
-        MessageSources messageSources
+        MessageSources messageSources,
+        @Value("${app.hotel-service.timeoutSec}") int hotelServiceTimeoutSec
     ) {
     	this.webClientBuilder = webClientBuilder;
         this.mapper = mapper;
         this.messageSources = messageSources;
+        this.hotelServiceTimeoutSec = hotelServiceTimeoutSec;
     }
     
     @Override
@@ -84,11 +94,17 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
         return body;
     }
 
+    @Retry(name = "hotel")
+    @CircuitBreaker(name = "hotel")
     @Override
-    public Mono<Hotel> getHotel(int hotelId) {
-    	String url = hotelServiceUrl + "/hotel/" + hotelId;
+    public Mono<Hotel> getHotel(int hotelId, int delay, int faultPercent) {
+
+        URI url = UriComponentsBuilder.fromUriString(hotelServiceUrl + "/hotel/{hotelId}?delay={delay}&faultPercent={faultPercent}").build(hotelId, delay, faultPercent);
         LOG.debug("Will call the getHotel API on URL: {}", url);
-        return getWebClient().get().uri(url).retrieve().bodyToMono(Hotel.class).log().onErrorMap(WebClientResponseException.class, ex -> handleException(ex));
+        return getWebClient().get().uri(url)
+                .retrieve().bodyToMono(Hotel.class).log()
+                .onErrorMap(WebClientResponseException.class, ex -> handleException(ex))
+                .timeout(Duration.ofSeconds(hotelServiceTimeoutSec));
     }
     
     @Override
@@ -104,7 +120,7 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
     
     @Override
     public Flux<Location> getLocation(int hotelId) {
-    	String url = locationServiceUrl + "/location?hotelId=" + hotelId;
+    	URI url = UriComponentsBuilder.fromUriString( locationServiceUrl + "/location?hotelId={hotelId}").build(hotelId);
     	LOG.debug("Will call the getLocation API on URL: {}", url);
     	// Return an empty result if something goes wrong to make it possible for the composite service to return partial responses
         return getWebClient().get().uri(url).retrieve().bodyToFlux(Location.class).log().onErrorResume(error -> empty());
@@ -123,7 +139,7 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
 
     @Override
     public Flux<Review> getReviews(int hotelId) {
-    	String url = reviewServiceUrl + "/review?hotelId=" + hotelId;
+        URI url = UriComponentsBuilder.fromUriString(reviewServiceUrl + "/review?hotelId={hotelId}").build(hotelId);
     	LOG.debug("Will call the getReviews API on URL: {}", url);
         // Return an empty result if something goes wrong to make it possible for the composite service to return partial responses
         return getWebClient().get().uri(url).retrieve().bodyToFlux(Review.class).log().onErrorResume(error -> empty());
@@ -142,7 +158,7 @@ public class HotelCompositeIntegration implements HotelService, LocationService,
 
     @Override
 	public Flux<Room> getRoom(int hotelId) {
-    	String url = roomServiceUrl + "/room?hotelId=" + hotelId;
+        URI url = UriComponentsBuilder.fromUriString(roomServiceUrl + "/room?hotelId={hotelId}").build(hotelId);
     	LOG.debug("Will call the getRooms API on URL: {}", url);
     	// Return an empty result if something goes wrong to make it possible for the composite service to return partial responses
         return getWebClient().get().uri(url).retrieve().bodyToFlux(Room.class).log().onErrorResume(error -> empty());

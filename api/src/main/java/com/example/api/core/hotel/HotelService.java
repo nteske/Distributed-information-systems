@@ -15,7 +15,11 @@ public interface HotelService {
     @GetMapping(
         value    = "/hotel/{hotelId}",
         produces = "application/json")
-     Mono<Hotel> getHotel(@PathVariable int hotelId);
+    Mono<Hotel> getHotel(
+        @PathVariable int hotelId,
+        @RequestParam(value = "delay", required = false, defaultValue = "0") int delay,
+        @RequestParam(value = "faultPercent", required = false, defaultValue = "0") int faultPercent
+    );
 
     void deleteHotel(@PathVariable int hotelId);
 

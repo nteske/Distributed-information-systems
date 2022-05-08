@@ -29,7 +29,7 @@ import static com.example.api.event.Event.Type.DELETE;
 import java.util.Date;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port: 0", "eureka.client.enabled=false"})
+@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port: 0", "eureka.client.enabled=false", "spring.cloud.config.enabled=false", "server.error.include-message=always"})
 public class HotelServiceApplicationTests {
 
 	@Autowired

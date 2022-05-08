@@ -1,8 +1,14 @@
 package com.example.microservices.composite.hotel.services;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import com.example.api.composite.hotel.*;
@@ -10,8 +16,10 @@ import com.example.api.core.room.Room;
 import com.example.api.core.hotel.Hotel;
 import com.example.api.core.review.Review;
 import com.example.api.core.location.Location;
+import com.example.util.exceptions.NotFoundException;
 import com.example.util.http.ServiceUtil;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +29,8 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
 
     private static final Logger LOG = LoggerFactory.getLogger(HotelCompositeServiceImpl.class);
 	
+    private final SecurityContext nullSC = new SecurityContextImpl();
+
 	private final ServiceUtil serviceUtil;
     private final HotelCompositeIntegration integration;
 
@@ -31,8 +41,13 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
     }
     
     @Override
-    public void createCompositeHotel(HotelAggregate body) {
+    public Mono<Void> createCompositeHotel(HotelAggregate body) {
+        return ReactiveSecurityContextHolder.getContext().doOnSuccess(sc -> internalCreateCompositeHotel(sc, body)).then();
+    }
+
+    public void internalCreateCompositeHotel(SecurityContext sc, HotelAggregate body) {
         try {
+            logAuthorizationInfo(sc);
 
             LOG.debug("createCompositeHotel: creates a new composite entity for hotelId: {}", body.getHotelId());
 
@@ -71,20 +86,27 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
     }
     
     @Override
-    public Mono<HotelAggregate> getCompositeHotel(int hotelId) {
+    public Mono<HotelAggregate> getCompositeHotel(int hotelId, int delay, int faultPercent) {
         return Mono.zip(
-            values -> createHotelAggregate((Hotel) values[0], (List<Location>) values[1], (List<Review>) values[2], (List<Room>) values[3], serviceUtil.getServiceAddress()),
-            integration.getHotel(hotelId),
-            integration.getLocation(hotelId).collectList(),
-            integration.getReviews(hotelId).collectList(),
-            integration.getRoom(hotelId).collectList())
+        		values -> createHotelAggregate((SecurityContext) values[0], (Hotel) values[1], (List<Location>) values[2], (List<Review>) values[3], (List<Room>) values[4], serviceUtil.getServiceAddress()),
+                ReactiveSecurityContextHolder.getContext().defaultIfEmpty(nullSC),
+                integration.getHotel(hotelId, delay, faultPercent)
+                	.onErrorReturn(CallNotPermittedException.class, getHotelFallbackValue(hotelId)),
+                integration.getLocation(hotelId).collectList(),
+                integration.getReviews(hotelId).collectList(),
+                integration.getRoom(hotelId).collectList())
             .doOnError(ex -> LOG.warn("getCompositeHotel failed: {}", ex.toString()))
             .log();
     }
     
     @Override
-    public void deleteCompositeHotel(int hotelId) {
+    public Mono<Void> deleteCompositeHotel(int hotelId) {
+        return ReactiveSecurityContextHolder.getContext().doOnSuccess(sc -> internalDeleteCompositeHotel(sc, hotelId)).then();
+    }
+
+    private void internalDeleteCompositeHotel(SecurityContext sc, int hotelId) {
     	try {
+            logAuthorizationInfo(sc);
             LOG.debug("deleteCompositeHotel: Deletes a hotel aggregate for hotelId: {}", hotelId);
 
             integration.deleteHotel(hotelId);
@@ -100,8 +122,20 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
         }
     }
 	
-	private HotelAggregate createHotelAggregate(Hotel hotel, List<Location> location, List<Review> reviews, List<Room> rooms, String serviceAddress) {
+    private Hotel getHotelFallbackValue(int hotelId) {
 
+        LOG.warn("Creating a fallback hotel for hotelId = {}", hotelId);
+
+        if (hotelId == 13) {
+            String errMsg = "Hotel Id: " + hotelId + " not found in fallback cache!";
+            LOG.warn(errMsg);
+            throw new NotFoundException(errMsg);
+            }
+        return new Hotel(hotelId, "Fallback hotel" + hotelId, "Description","image",new Date(), serviceUtil.getServiceAddress());
+    }
+    
+	private HotelAggregate createHotelAggregate(SecurityContext sc, Hotel hotel, List<Location> location, List<Review> reviews, List<Room> rooms, String serviceAddress) {
+		logAuthorizationInfo(sc);
         // 1. Setup hotel info
         int hotelId = hotel.getHotelId();
         String title = hotel.getTitle();
@@ -138,4 +172,28 @@ public class HotelCompositeServiceImpl implements HotelCompositeService {
         						  locationSummaries, reviewSummaries, roomSummaries, serviceAddresses);
     }
 
+	private void logAuthorizationInfo(SecurityContext sc) {
+        if (sc != null && sc.getAuthentication() != null && sc.getAuthentication() instanceof JwtAuthenticationToken) {
+            Jwt jwtToken = ((JwtAuthenticationToken)sc.getAuthentication()).getToken();
+            logAuthorizationInfo(jwtToken);
+        } else {
+            LOG.warn("No JWT based Authentication supplied, running tests are we?");
+        }
+    }
+
+    private void logAuthorizationInfo(Jwt jwt) {
+        if (jwt == null) {
+            LOG.warn("No JWT supplied, running tests are we?");
+        } else {
+            if (LOG.isDebugEnabled()) {
+                URL issuer = jwt.getIssuer();
+                List<String> audience = jwt.getAudience();
+                Object subject = jwt.getClaims().get("sub");
+                Object scopes = jwt.getClaims().get("scope");
+                Object expires = jwt.getClaims().get("exp");
+
+                LOG.debug("Authorization info: Subject: {}, scopes: {}, expires {}: issuer: {}, audience: {}", subject, scopes, expires, issuer, audience);
+            }
+        }
+    }
 }

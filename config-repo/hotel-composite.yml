@@ -21,22 +21,25 @@ api:
         # Normal response
         If the requested hotel id is found the method will return information regarding:
         1. Hotel information
-        1. Location
         1. Reviews
+        1. Location
         1. Rooms
         1. Service Addresses
         (technical information regarding the addresses of the microservices that created the response)
+        
         # Expected partial and error responses
         1. If no hotel information is found, a <b>404 - Not Found</b> error will be returned
-        1. If no location, rooms or reviews are found for a hotel, a partial response will be returned
+        1. In no location, reviews or rooms are found for a hotel, a partial response will be returned
+
     create-composite-hotel:
       description: Creates a composite hotel
       notes: |
         # Normal response
-        The composite hotel information posted to the API will be split up and stored as separate hotel-info, location, room and review entities.
+        The composite hotel information posted to the API will be splitted up and stored as separate hotel-info, location, room and review entities.
         # Expected error responses
         1. If a hotel with the same hotelId as specified in the posted information already exists,
            an <b>422 - Unprocessable Entity</b> error with a "duplicate key" error message will be returned
+    
     delete-composite-hotel:
       description: Deletes a hotel composite
       notes: |
@@ -46,20 +49,6 @@ api:
         This means that a delete request of a non existing hotel will return <b>200 Ok</b>.
 server.port: 7000
 server.error.include-message: always
-
-spring.application.name: hotel-composite
-
-app.eureka-server: localhost
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://${app.eureka-server}:8761/eureka/
-    initialInstanceInfoReplicationIntervalSeconds: 5
-    registryFetchIntervalSeconds: 5
-  instance:
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 5
 
 ribbon.ServerListRefreshInterval: 5000
 
@@ -86,22 +75,39 @@ spring.cloud.stream:
       producer:
         required-groups: auditGroup
 
-spring.cloud.stream.kafka.binder:
-  brokers: 127.0.0.1
-  defaultBrokerPort: 9092
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri: http://${app.auth-server}:9999/.well-known/jwks.json
 
-spring.rabbitmq:
-  host: 127.0.0.1
-  port: 5672
-  username: guest
-  password: guest
+app.hotel-service.timeoutSec: 2
+
+resilience4j.retry:
+  backends:
+    hotel:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+      - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
+management.health.circuitbreakers.enabled: true
+
+resilience4j.circuitbreaker:
+  backends:
+    hotel:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+      ringBufferSizeInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      ignoreExceptions:
+        - com.example.util.exceptions.InvalidInputException
+        - com.example.util.exceptions.NotFoundException
+
 logging:
   level:
     root: INFO
     com.example: DEBUG
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
 
-management.endpoint.health.show-details: "ALWAYS"
-management.endpoints.web.exposure.include: "*"
 ---
 spring.profiles: docker
 
@@ -109,8 +115,21 @@ server.port: 8080
 
 eureka.client.serviceUrl.defaultZone: http://eureka:8761/eureka/
 
-spring.rabbitmq.host: rabbitmq
+---
+spring.profiles: streaming_partitioned
 
-spring.cloud.stream.kafka.binder.brokers: kafka
+spring.cloud.stream.bindings.output-hotels.producer:
+  partition-key-expression: payload.key
+  partition-count: 2
 
-app.eureka-server: eureka
+spring.cloud.stream.bindings.output-locations.producer:
+  partition-key-expression: payload.key
+  partition-count: 2
+
+spring.cloud.stream.bindings.output-reviews.producer:
+  partition-key-expression: payload.key
+  partition-count: 2
+
+spring.cloud.stream.bindings.output-rooms.producer:
+  partition-key-expression: payload.key
+  partition-count: 2

@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import org.springframework.http.HttpStatus;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -30,7 +32,10 @@ import com.example.util.exceptions.InvalidInputException;
 import com.example.util.exceptions.NotFoundException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"eureka.client.enabled=false"})
+@SpringBootTest(
+		webEnvironment=RANDOM_PORT,
+		classes = {HotelCompositeServiceApplication.class, TestSecurityConfig.class },
+		properties = {"spring.main.allow-bean-definition-overriding=true","eureka.client.enabled=false","spring.cloud.config.enabled=false"})
 public class HotelCompositeServiceApplicationTests {
 
 	private static final int HOTEL_ID_OK = 1;
@@ -46,7 +51,7 @@ public class HotelCompositeServiceApplicationTests {
 	@Before
 	public void setUp() {
 
-		when(compositeIntegration.getHotel(HOTEL_ID_OK)).
+		when(compositeIntegration.getHotel(eq(HOTEL_ID_OK), anyInt(), anyInt())).
 			thenReturn(Mono.just(new Hotel(HOTEL_ID_OK, "Crystal Hotel", "Place where comfort meets luxury.", "https://placekitten.com/200/300", new Date(), "mock-address")));
 		when(compositeIntegration.getLocation(HOTEL_ID_OK)).
 			thenReturn(Flux.fromIterable(singletonList(new Location(HOTEL_ID_OK,1 , "Serbia", "Belgrade", "Internacionalnih Brigada 9", "mock address"))));
@@ -55,9 +60,9 @@ public class HotelCompositeServiceApplicationTests {
 		when(compositeIntegration.getRoom(HOTEL_ID_OK)).
 			thenReturn(Flux.fromIterable(singletonList(new Room(HOTEL_ID_OK, 1, 26, 3, 220, "mock address"))));
 		
-		when(compositeIntegration.getHotel(HOTEL_ID_NOT_FOUND)).thenThrow(new NotFoundException("NOT FOUND: " + HOTEL_ID_NOT_FOUND));
+		when(compositeIntegration.getHotel(eq(HOTEL_ID_NOT_FOUND), anyInt(), anyInt())).thenThrow(new NotFoundException("NOT FOUND: " + HOTEL_ID_NOT_FOUND));
 
-		when(compositeIntegration.getHotel(HOTEL_ID_INVALID)).thenThrow(new InvalidInputException("INVALID: " + HOTEL_ID_INVALID));
+		when(compositeIntegration.getHotel(eq(HOTEL_ID_INVALID), anyInt(), anyInt())).thenThrow(new InvalidInputException("INVALID: " + HOTEL_ID_INVALID));
 	}
 
 	@Test
