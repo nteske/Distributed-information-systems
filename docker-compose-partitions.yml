@@ -22,7 +22,7 @@ services:
     networks:
       - my-network
     environment:
-      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_0
+      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_1
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
       - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
@@ -52,7 +52,7 @@ services:
     networks:
       - my-network
     environment:
-      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_0
+      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_1
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
       - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
@@ -82,7 +82,7 @@ services:
     networks:
       - my-network
     environment:
-      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_0
+      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_1
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
       - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
@@ -112,7 +112,7 @@ services:
     networks:
       - my-network
     environment:
-      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_0
+      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_1
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
       - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
@@ -127,7 +127,7 @@ services:
     networks:
       - my-network
     environment:
-      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned,streaming_instance_0
+      - SPRING_PROFILES_ACTIVE=docker,streaming_partitioned
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
       - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:

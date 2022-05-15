@@ -94,7 +94,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
-      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}  
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
 
   auth-server:
     build: spring-cloud/authorization-server
@@ -118,7 +118,7 @@ services:
       - SPRING_SECURITY_USER_PASSWORD=${CONFIG_SERVER_PWD}
     volumes:
       - $PWD/config-repo:/config-repo
-    
+
   # $ mongo
   mongodb:
     image: mongo:3.6.9
