@@ -3,15 +3,15 @@ server.error.include-message: always
 
 spring.data.mongodb:
   host: localhost
-  port: 27017
+  port: 27018
   database: hotel-db
 
 spring.cloud.stream:
   defaultBinder: rabbit
   default.contentType: application/json
   bindings.input:
-    destination: hotel
-    group: hotelGroup
+    destination: hotels
+    group: hotelsGroup
 
 spring.cloud.stream.bindings.input.consumer:
   maxAttempts: 3

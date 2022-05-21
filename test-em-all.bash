@@ -104,7 +104,7 @@ function testCompositeCreated() {
     assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
     if [ "$?" -eq "1" ] ; then return 1; fi
 
-	assertEqual 3 $(echo $RESPONSE | jq ".rooms | length")
+	assertEqual 0 $(echo $RESPONSE | jq ".rooms | length")
     if [ "$?" -eq "1" ] ; then return 1; fi
     set -e
 }
@@ -134,7 +134,6 @@ function waitForMessageProcessing() {
 function recreateComposite() {
     local hotelId=$1
     local composite=$2
-
     assertCurl 200 "curl $AUTH -X DELETE -k https://$HOST:$PORT/hotel-composite/${hotelId} -s"
     curl -X POST -k https://$HOST:$PORT/hotel-composite -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" --data "$composite"
 }
@@ -148,13 +147,12 @@ function setupTestdata() {
     {"reviewId":3,"rating":0,"description":"Description 3","createdOn":"2021-08-12"}
 ]}'
     recreateComposite "$HOT_ID_NO_LOC_NO_ROO" "$body"
-
 body="{\"hotelId\":$HOT_ID_NO_REVS_NO_ROO"
     body+=\
 ',"title":"Hotel 214","description":"Description 2","image":"Image 3","createdOn":"2021-08-12", "room":[
-		{"roomId":1,324,3,3333},
-        {"roomId":2,325,3,3333},
-        {"roomId":3,326,3,3333}
+		{"roomId":1,"roomNumber":324,"beds":3,"price":3333},
+        {"roomId":2,"roomNumber":325,"beds":3,"price":3333},
+        {"roomId":3,"roomNumber":326,"beds":3,"price":3333}
 	]
 }'
     recreateComposite "$HOT_ID_NO_REVS_NO_ROO" "$body"
@@ -170,9 +168,9 @@ body="{\"hotelId\":$HOT_ID_REVS_LOC_ROO"
         {"reviewId":2,"rating":0,"description":"Description 2","createdOn":"2021-08-12"},
         {"reviewId":3,"rating":0,"description":"Description 3","createdOn":"2021-08-12"}
     ], "room":[
-		{"roomId":1,324,3,3333},
-        {"roomId":2,325,3,3333},
-        {"roomId":3,326,3,3333}
+		{"roomId":1,"roomNumber":324,"beds":3,"price":3333},
+        {"roomId":2,"roomNumber":325,"beds":3,"price":3333},
+        {"roomId":3,"roomNumber":326,"beds":3,"price":3333}
     ]}'
     recreateComposite "$HOT_ID_REVS_LOC_ROO" "$body"
 
@@ -277,9 +275,9 @@ assertEqual 0 $(echo $RESPONSE | jq ".room | length")
 # Verify that no reviews and no rooms are returned for hotelId $HOT_ID_NO_REVS_NO_ROO
 assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_NO_REVS_NO_ROO $AUTH -s"
 assertEqual "$HOT_ID_NO_REVS_NO_ROO" $(echo $RESPONSE | jq .hotelId)
-assertEqual 3 $(echo $RESPONSE | jq ".location | length")
+assertEqual 0 $(echo $RESPONSE | jq ".location | length")
 assertEqual 0 $(echo $RESPONSE | jq ".reviews | length")
-assertEqual 0 $(echo $RESPONSE | jq ".room | length")
+assertEqual 3 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that a 422 (Unprocessable Entity) error is returned for a hotelId that is out of range (-1)
 assertCurl 422 "curl -k https://$HOST:$PORT/hotel-composite/-1 $AUTH -s"

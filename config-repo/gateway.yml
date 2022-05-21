@@ -14,10 +14,10 @@ ribbon.NFLoadBalancerPingInterval: 5
 
 spring.cloud.gateway.routes:
 
-- id: movie-composite
-  uri: lb://movie-composite
+- id: hotel-composite
+  uri: lb://hotel-composite
   predicates:
-  - Path=/movie-composite/**
+  - Path=/hotel-composite/**
   #        filters:
   #        - TokenRelay=
 

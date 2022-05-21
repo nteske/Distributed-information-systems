@@ -173,8 +173,8 @@ services:
     networks:
       - my-network
     ports:
-      - "27017:27017"
-    command: mongod --smallfiles
+      - "27018:27018"
+    command: mongod --smallfiles --port 27018
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"
       interval: 20s
