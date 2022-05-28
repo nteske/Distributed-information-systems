@@ -301,6 +301,7 @@ items:
                   value: docker
               image: gateway
               name: gateway
+              imagePullPolicy: Never
               ports:
                 - containerPort: 8443
               resources:
