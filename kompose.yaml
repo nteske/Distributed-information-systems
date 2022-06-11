@@ -1,6 +1,26 @@
 apiVersion: v1
 items:
   - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: dis
+      labels:
+        name: dis
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: fabric8-rbac
+    subjects:
+      - kind: ServiceAccount
+        # Reference to upper's `metadata.name`
+        name: default
+        # Reference to upper's `metadata.namespace`
+        namespace: dis
+    roleRef:
+      kind: ClusterRole
+      name: cluster-admin
+      apiGroup: rbac.authorization.k8s.io
+  - apiVersion: v1
     kind: Service
     metadata:
       annotations:
@@ -9,6 +29,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: gateway
+      namespace: dis
       name: gateway
     spec:
       type: LoadBalancer
@@ -29,9 +50,10 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: mongodb
+      namespace: dis
       name: mongodb
     spec:
-      type: LoadBalancer
+      type: NodePort
       ports:
         - name: "27018"
           port: 27018
@@ -48,10 +70,71 @@ items:
         kompose.version: 1.26.0 (40646f47)
       creationTimestamp: null
       labels:
+        io.kompose.service: auth-server
+      namespace: dis
+      name: auth-server
+    spec:
+      ports:
+        - name: "9999"
+          port: 9999
+          targetPort: 9999
+      selector:
+        io.kompose.service: auth-server
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        kompose.cmd: C:\kompose\kompose.exe convert -f docker-compose.yml -o kompose.yaml
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: eureka
+      namespace: dis
+      name: eureka
+    spec:
+      ports:
+        - name: "8761"
+          port: 8761
+          targetPort: 8761
+      selector:
+        io.kompose.service: eureka
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        kompose.cmd: C:\kompose\kompose.exe convert -f docker-compose.yml -o kompose.yaml
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: config-server
+      namespace: dis
+      name: config-server
+    spec:
+      ports:
+        - name: "8888"
+          port: 8888
+          targetPort: 8888
+      selector:
+        io.kompose.service: config-server
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        kompose.cmd: C:\kompose\kompose.exe convert -f docker-compose.yml -o kompose.yaml
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
         io.kompose.service: mysql
+      namespace: dis
       name: mysql
     spec:
-      type: LoadBalancer
+      type: NodePort
       ports:
         - name: "3306"
           port: 3306
@@ -69,9 +152,10 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: rabbitmq
+      namespace: dis
       name: rabbitmq
     spec:
-      type: LoadBalancer
+      type: NodePort
       ports:
         - name: "5672"
           port: 5672
@@ -92,9 +176,10 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: zipkin
+      namespace: dis
       name: zipkin
     spec:
-      type: LoadBalancer
+      type: NodePort
       ports:
         - name: "9411"
           port: 9411
@@ -103,6 +188,23 @@ items:
         io.kompose.service: zipkin
     status:
       loadBalancer: {}
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: gateway-ingress
+      namespace: dis
+    spec:
+      rules:
+      - host: testnemanja.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 8443
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -112,6 +214,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: auth-server
+      namespace: dis
       name: auth-server
     spec:
       replicas: 1
@@ -137,8 +240,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: auth-server
+              image: distributed-information-systems_auth-server
               name: auth-server
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -148,7 +252,7 @@ items:
     kind: NetworkPolicy
     metadata:
       name: app
-      namespace: default
+      namespace: dis
       creationTimestamp: null
     spec:
       ingress:
@@ -168,6 +272,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: config-server
+      namespace: dis
       name: config-server
     spec:
       replicas: 1
@@ -178,6 +283,7 @@ items:
         type: Recreate
       template:
         metadata:
+          namespace: dis
           annotations:
             kompose.cmd: C:\kompose\kompose.exe convert -f docker-compose.yml -o kompose.yaml
             kompose.version: 1.26.0 (40646f47)
@@ -196,8 +302,9 @@ items:
                   value: dev-usr
                 - name: SPRING_SECURITY_USER_PASSWORD
                   value: dev-pwd
-              image: config-server
+              image: distributed-information-systems_config-server
               name: config-server
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -216,6 +323,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: c
+      namespace: dis
       name: c
     spec:
       accessModes:
@@ -233,6 +341,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: eureka
+      namespace: dis
       name: eureka
     spec:
       replicas: 1
@@ -258,7 +367,8 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: eureka
+              image: distributed-information-systems_eureka
+              imagePullPolicy: Never
               name: eureka
               resources:
                 limits:
@@ -274,6 +384,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: gateway
+      namespace: dis
       name: gateway
     spec:
       replicas: 1
@@ -299,7 +410,7 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: gateway
+              image: distributed-information-systems_gateway
               name: gateway
               imagePullPolicy: Never
               ports:
@@ -318,6 +429,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: hotel
+      namespace: dis
       name: hotel
     spec:
       replicas: 1
@@ -343,8 +455,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: hotel
+              image: distributed-information-systems_hotel
               name: hotel
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -359,6 +472,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: hotel-composite
+      namespace: dis
       name: hotel-composite
     spec:
       replicas: 1
@@ -384,8 +498,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: hotel-composite
+              image: distributed-information-systems_hotel-composite
               name: hotel-composite
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -400,6 +515,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: location
+      namespace: dis
       name: location
     spec:
       replicas: 1
@@ -425,8 +541,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: location
+              image: distributed-information-systems_location
               name: location
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -441,6 +558,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: mongodb
+      namespace: dis
       name: mongodb
     spec:
       replicas: 1
@@ -482,6 +600,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: mysql
+      namespace: dis
       name: mysql
     spec:
       replicas: 1
@@ -527,6 +646,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: rabbitmq
+      namespace: dis
       name: rabbitmq
     spec:
       replicas: 1
@@ -564,6 +684,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: review
+      namespace: dis
       name: review
     spec:
       replicas: 1
@@ -589,8 +710,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: review
+              image: distributed-information-systems_review
               name: review
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -605,6 +727,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: room
+      namespace: dis
       name: room
     spec:
       replicas: 1
@@ -630,8 +753,9 @@ items:
                   value: dev-usr
                 - name: SPRING_PROFILES_ACTIVE
                   value: docker
-              image: room
+              image: distributed-information-systems_room
               name: room
+              imagePullPolicy: Never
               resources:
                 limits:
                   memory: "367001600"
@@ -646,6 +770,7 @@ items:
       creationTimestamp: null
       labels:
         io.kompose.service: zipkin
+      namespace: dis
       name: zipkin
     spec:
       replicas: 1
