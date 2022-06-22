@@ -88,3 +88,22 @@ logging:
 spring.profiles: docker
 
 app.config-server: config-server
+
+---
+spring.config.activate.on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: WARN
+    org.springframework.cloud.gateway: WARN
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: WARN
+
+---
+spring.config.activate.on-profile: ssl
+server.port: 8443
+
+server.ssl:
+  key-store-type: PKCS12
+  key-store: classpath:keystore/edge.p12
+  key-alias: localhost

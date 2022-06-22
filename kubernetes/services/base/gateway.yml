@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dis
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: distributed-information-systems_gateway
+        imagePullPolicy: Never
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "docker,kubernetes"
+          - name: SPRING_CONFIG_LOCATION
+            value: file:/config-repo/application.yml,file:/config-repo/gateway.yml
+        envFrom:
+          - secretRef:
+              name: rabbitmq-credentials
+        ports:
+        - containerPort: 8443
+        resources:
+          limits:
+            memory: 500Mi
+        volumeMounts:
+          - name: config-repo-volume
+            mountPath: /config-repo
+      volumes:
+        - name: config-repo-volume
+          configMap:
+            name: config-repo-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: dis
+  name: gateway
+spec:
+  selector:
+    app: gateway
+  type: NodePort
+  ports:
+    - port: 8443
+      name: http
+      targetPort: 8443

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: dis
+  name: mongodb
+spec:
+  serviceName: "mongodb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          args:
+          - --dbpath=/data/db
+          - --port=27018
+          - --bind_ip=0.0.0.0
+          command:
+          - mongod
+          imagePullPolicy: IfNotPresent
+          image: mongo:3.6.9
+          ports:
+            - containerPort: 27018
+          resources:
+            limits:
+              memory: 350Mi
+          volumeMounts:
+            - mountPath: /data/db
+              name: datadir
+            - mountPath: /data/configdb
+              name: configdir
+            - mountPath: /work-dir
+              name: workdir
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        namespace: dis
+      spec:
+        storageClassName: "fast"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: configdir
+        namespace: dis
+      spec:
+        storageClassName: "fast"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: workdir
+        namespace: dis
+      spec:
+        storageClassName: "fast"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: dis
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  type: NodePort
+  ports:
+    - port: 27018

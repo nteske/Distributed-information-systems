@@ -13,3 +13,13 @@ eureka:
   server:
     waitTimeInMsWhenSyncEmpty: 0
     response-cache-update-interval-ms: 5000
+
+
+---
+spring.config.activate.on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    fr.edjaz: WARN
+    org.springframework.data.mongodb.core.MongoTemplate: WARN

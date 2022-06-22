@@ -1,0 +1,7 @@
+bases:
+  - ../base
+resources:
+  - storage.yml
+  - mongodb-set.yml
+  - rabbitmq-dev.yml
+  - mysql-set.yml 

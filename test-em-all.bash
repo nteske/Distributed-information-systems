@@ -8,8 +8,8 @@
 #
 #   HOST=localhost PORT=7000 ./test-em-all.bash
 #
-: ${HOST=localhost}
-: ${PORT=8443}
+: ${HOST=172.23.145.126}
+: ${PORT=80}
 : ${HOT_ID_REVS_LOC_ROO=2}
 : ${HOT_ID_NOT_FOUND=13}
 : ${HOT_ID_NO_LOC_NO_ROO=114}
@@ -88,7 +88,7 @@ function waitForService() {
 function testCompositeCreated() {
 
     # Expect that the Hotel Composite for hotelId $HOT_ID_REVS_LOC_ROO has been created with three reviews, three location and three rooms
-    if ! assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO -s"
+    if ! assertCurl 200 "curl $AUTH -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO -s"
     then
         echo -n "FAIL"
         return 1
@@ -134,8 +134,8 @@ function waitForMessageProcessing() {
 function recreateComposite() {
     local hotelId=$1
     local composite=$2
-    assertCurl 200 "curl $AUTH -X DELETE -k https://$HOST:$PORT/hotel-composite/${hotelId} -s"
-    curl -X POST -k https://$HOST:$PORT/hotel-composite -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" --data "$composite"
+    assertCurl 200 "curl $AUTH -X DELETE -k http://$HOST:$PORT/hotel-composite/${hotelId} -s"
+    curl -X POST -k http://$HOST:$PORT/hotel-composite -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" --data "$composite"
 }
 
 function setupTestdata() {
@@ -189,21 +189,21 @@ function testCircuitBreaker() {
     # Also, verify that we get 500 back and a timeout related error message
     for ((n=0; n<3; n++))
     do
-        assertCurl 500 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO?delay=3 $AUTH -s"
+        assertCurl 500 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO?delay=3 $AUTH -s"
         message=$(echo $RESPONSE | jq -r .message)
         assertEqual "Did not observe any item or terminal signal within 2000ms" "${message:0:57}"
     done
 
     # Verify that the circuit breaker now is open by running the slow call again, verify it gets 200 back, i.e. fail fast works, and a response from the fallback method.
-    assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO?delay=3 $AUTH -s"
+    assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO?delay=3 $AUTH -s"
     assertEqual "Fallback hotel2" "$(echo "$RESPONSE" | jq -r .title)"
 
     # Also, verify that the circuit breaker is open by running a normal call, verify it also gets 200 back and a response from the fallback method.
-    assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
+    assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
     assertEqual "Fallback hotel2" "$(echo "$RESPONSE" | jq -r .title)"
 
     # Verify that a 404 (Not Found) error is returned for a non existing hotelId ($HOT_ID_NOT_FOUND) from the fallback method.
-    assertCurl 404 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_NOT_FOUND $AUTH -s"
+    assertCurl 404 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_NOT_FOUND $AUTH -s"
     assertEqual "Hotel Id: $HOT_ID_NOT_FOUND not found in fallback cache!" "$(echo $RESPONSE | jq -r .message)"
 
     # Wait for the circuit breaker to transition to the half open state (i.e. max 10 sec)
@@ -217,7 +217,7 @@ function testCircuitBreaker() {
     # Also, verify that we get 200 back and a response based on information in the hotel database
     for ((n=0; n<3; n++))
     do
-        assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
+        assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
         assertEqual "Hotel 214" "$(echo "$RESPONSE" | jq -r .title)"
     done
 
@@ -246,9 +246,9 @@ then
     docker-compose up -d
 fi
 
-waitForService curl -k https://$HOST:$PORT/actuator/health
+waitForService curl -k http://$HOST:$PORT/actuator/health
 
-ACCESS_TOKEN=$(curl -k https://writer:secret@$HOST:$PORT/oauth/token -d grant_type=password -d username=magnus -d password=password -s | jq .access_token -r)
+ACCESS_TOKEN=$(curl -k http://writer:secret@$HOST:$PORT/oauth/token -d grant_type=password -d username=magnus -d password=password -s | jq .access_token -r)
 AUTH="-H \"Authorization: Bearer $ACCESS_TOKEN\""
 
 setupTestdata
@@ -256,46 +256,46 @@ setupTestdata
 waitForMessageProcessing
 
 # Verify that a normal request works, expect three room, three reviews and three rooms
-assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
+assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $AUTH -s"
 assertEqual "$HOT_ID_REVS_LOC_ROO" $(echo $RESPONSE | jq .hotelId)
 assertEqual 3 $(echo $RESPONSE | jq ".location | length")
 assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
 assertEqual 3 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that a 404 (Not Found) error is returned for a non existing hotelId ($HOT_ID_NOT_FOUND)
-assertCurl 404 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_NOT_FOUND $AUTH -s"
+assertCurl 404 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_NOT_FOUND $AUTH -s"
 
 # Verify that no room and no rooms are returned for hotelId $HOT_ID_NO_LOC_NO_ROO
-assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_NO_LOC_NO_ROO $AUTH -s"
+assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_NO_LOC_NO_ROO $AUTH -s"
 assertEqual "$HOT_ID_NO_LOC_NO_ROO" $(echo $RESPONSE | jq .hotelId)
 assertEqual 0 $(echo $RESPONSE | jq ".location | length")
 assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
 assertEqual 0 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that no reviews and no rooms are returned for hotelId $HOT_ID_NO_REVS_NO_ROO
-assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_NO_REVS_NO_ROO $AUTH -s"
+assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_NO_REVS_NO_ROO $AUTH -s"
 assertEqual "$HOT_ID_NO_REVS_NO_ROO" $(echo $RESPONSE | jq .hotelId)
 assertEqual 0 $(echo $RESPONSE | jq ".location | length")
 assertEqual 0 $(echo $RESPONSE | jq ".reviews | length")
 assertEqual 3 $(echo $RESPONSE | jq ".room | length")
 
 # Verify that a 422 (Unprocessable Entity) error is returned for a hotelId that is out of range (-1)
-assertCurl 422 "curl -k https://$HOST:$PORT/hotel-composite/-1 $AUTH -s"
+assertCurl 422 "curl -k http://$HOST:$PORT/hotel-composite/-1 $AUTH -s"
 assertEqual "\"Invalid hotelId: -1\"" "$(echo $RESPONSE | jq .message)"
 
 # Verify that a 400 (Bad Request) error error is returned for a hotelId that is not a number, i.e. invalid format
-assertCurl 400 "curl -k https://$HOST:$PORT/hotel-composite/invalidHotelId $AUTH -s"
+assertCurl 400 "curl -k http://$HOST:$PORT/hotel-composite/invalidHotelId $AUTH -s"
 assertEqual "\"Type mismatch.\"" "$(echo $RESPONSE | jq .message)"
 
 # Verify that a request without access token fails on 401, Unauthorized
-assertCurl 401 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO -s"
+assertCurl 401 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO -s"
 
 # Verify that the reader - client with only read scope can call the read API but not delete API.
-READER_ACCESS_TOKEN=$(curl -k https://reader:secret@$HOST:$PORT/oauth/token -d grant_type=password -d username=magnus -d password=password -s | jq .access_token -r)
+READER_ACCESS_TOKEN=$(curl -k http://reader:secret@$HOST:$PORT/oauth/token -d grant_type=password -d username=magnus -d password=password -s | jq .access_token -r)
 READER_AUTH="-H \"Authorization: Bearer $READER_ACCESS_TOKEN\""
 
-assertCurl 200 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $READER_AUTH -s"
-assertCurl 403 "curl -k https://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $READER_AUTH -X DELETE -s"
+assertCurl 200 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $READER_AUTH -s"
+assertCurl 403 "curl -k http://$HOST:$PORT/hotel-composite/$HOT_ID_REVS_LOC_ROO $READER_AUTH -X DELETE -s"
 
 testCircuitBreaker
 

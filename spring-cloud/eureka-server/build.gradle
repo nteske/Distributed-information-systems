@@ -28,6 +28,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.glassfish.jaxb:jaxb-runtime'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client:2.1.3'
+    implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-config:2.1.1'
+
 }
 
 dependencyManagement {

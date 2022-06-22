@@ -15,3 +15,9 @@ spring:
 spring.profiles: docker
 
 app.config-server: config-server
+
+
+---
+spring.config.activate.on-profile: kubernetes
+
+eureka.client.enabled: false

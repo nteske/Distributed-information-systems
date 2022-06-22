@@ -1,0 +1,55 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edge
+  namespace: dis
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS 
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 8443
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edge2
+  namespace: dis
+
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/oauth"
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-server
+                port:
+                  number: 9999
+
+          - path: /hotel-composite
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-composite
+                port:
+                  number: 8080
+        
+          - path: /actuator/health
+            pathType: Prefix
+            backend:
+              service:
+                name: hotel-composite
+                port:
+                  number: 4004

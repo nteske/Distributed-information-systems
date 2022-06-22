@@ -1,0 +1,11 @@
+resources:
+  - roles.yml
+  - gateway.yml
+  - auth-server.yml
+  - hotel-composite.yml
+  - hotel.yml
+  - location.yml
+  - room.yml
+  - review.yml
+  - zipkin-server.yml
+  - ingress-edge-server.yml

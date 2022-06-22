@@ -1,1 +1,6 @@
 server.port: 9999
+
+---
+spring.config.activate.on-profile: prod
+
+logging.level.root: WARN

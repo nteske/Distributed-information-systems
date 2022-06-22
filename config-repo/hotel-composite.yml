@@ -131,3 +131,12 @@ spring.cloud.stream.bindings.output-reviews.producer:
 spring.cloud.stream.bindings.output-rooms.producer:
   partition-key-expression: payload.key
   partition-count: 2
+
+---
+spring.config.activate.on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    fr.edjaz: WARN
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: WARN
